@@ -14,6 +14,8 @@ import java.util.List;
 public class InfoRecycleAdapter extends RecyclerView.Adapter<InfoRecycleHolder> {
     private List<Info> infolist;
 
+
+
     public InfoRecycleAdapter(final List<Info> info) {
         this.infolist = info;
     }

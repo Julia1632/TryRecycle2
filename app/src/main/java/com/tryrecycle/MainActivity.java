@@ -1,56 +1,71 @@
 package com.tryrecycle;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
+
+import com.tryrecycle.Adapter.MyAdapter;
+import com.tryrecycle.Interface.ILoadMore;
+import com.tryrecycle.Model.Item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
+    List<Item> items = new ArrayList<>();
+    MyAdapter adapter;
 
-    private List<Info> info10;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        init();
 
-        RecyclerView rv=(RecyclerView) findViewById(R.id.recycle_view);
-       // rv.setHasFixedSize(true);
-        rv.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-        rv.setAdapter(new InfoRecycleAdapter(info10));
+        random10Data(0, 10);
 
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new MyAdapter(recyclerView, this, items);
+        recyclerView.setAdapter(adapter);
 
+        //Set Load more
+        adapter.setLoadMore(new ILoadMore() {
+            @Override
+            public void onLoadMore() {
+                if (items.size() <= 100) {
+                    items.add(null);
+                    adapter.notifyItemInserted(items.size() - 1);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            items.remove(items.size() - 1);
+                            adapter.notifyItemRemoved(items.size());
+
+                            //random more data
+                            int index = items.size();
+                            int end = index + 10;
+                            random10Data(index, end);
+                            adapter.notifyDataSetChanged();
+                            adapter.setLoaded();
+                        }
+                    }, 3000);
+                } else {
+                    Toast.makeText(MainActivity.this, "Load data completed !!!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
-
-
-    private void init() {
-        info10=new ArrayList<>();
-        info10.add(new Info("1name","1s"));
-        info10.add(new Info("2name","2s"));
-        info10.add(new Info("3name","3s"));
-        info10.add(new Info("4name","4s"));
-        info10.add(new Info("5name","5s"));
-        info10.add(new Info("6name","6s"));
-        info10.add(new Info("7name","7s"));
-        info10.add(new Info("8name","8s"));
-        info10.add(new Info("9name","9s"));
-        info10.add(new Info("1name","1s"));
-        info10.add(new Info("2name","2s"));
-        info10.add(new Info("3name","3s"));
-        info10.add(new Info("4name","4s"));
-        info10.add(new Info("5name","5s"));
-        info10.add(new Info("6name","6s"));
-        info10.add(new Info("7name","7s"));
-        info10.add(new Info("8name","8s"));
-        info10.add(new Info("9name","9s"));
-
+    private void random10Data(int indexStart, int indexEnd) {
+        //random data
+        for (int i = indexStart; i < indexEnd; i++) {
+            String name = UUID.randomUUID().toString();
+            Item newItem = new Item(name, name.length());
+            items.add(newItem);
+        }
     }
-
-    
 }
-
